@@ -1,13 +1,38 @@
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsUUID,
+} from 'class-validator';
+
 export class UpdateStaffDto {
-  readonly id: string;
-  readonly name: string;
-  readonly baseSalary: number;
-  readonly currentSalary: number;
-  readonly type: string;
-  readonly hiredDate: string;
-  readonly supervisor: string | null;
-  readonly isSupervisor: boolean;
-  readonly subordinates: string[] | null;
-  readonly createdAt: Date;
-  readonly updtedAt: Date;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsOptional()
+  hiredDate: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  baseSalary: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  currentSalary: number;
+
+  @IsString()
+  companyName: string;
+
+  @IsOptional()
+  @IsString()
+  supervisorName: string;
+
+  @IsOptional()
+  @IsString()
+  typeName: string;
 }

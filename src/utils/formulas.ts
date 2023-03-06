@@ -51,7 +51,7 @@ export const staffSalary = (
 
     // //If Manager or Sales
   } else if (staffType === 'Manager' || staffType === 'Sales') {
-    //max % of the base salary for Managers or Sales
+    //max % of the base salary for Managers or Sales. 0.4 means 40% etc
     const maxPercentSalaryForYears = staffType === 'Manager' ? 0.4 : 0.35;
     // % bonus per years of the base salary for Managers or Sales
     const percentBonusForYears = staffType === 'Manager' ? 0.05 : 0.01;

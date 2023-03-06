@@ -1,47 +1,49 @@
 import {
   Entity,
-  JoinColumn,
-  OneToMany,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   PrimaryGeneratedColumn,
   Unique,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { CompanyEntity } from './company.entity';
+import { StaffMemberTypeEntity } from './staff-member-type.entity';
+import { SubordinateEntity } from './subordinate.entity';
 
-@Entity()
-@Unique(['id'])
-export class Staff {
-  @PrimaryGeneratedColumn()
+@Entity('staff')
+export class StaffEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
-
-  @Column()
-  baseSalary: number;
-
-  @Column()
-  currentSalary: number;
-
-  @Column()
-  type: string;
 
   @Column()
   hiredDate: string;
 
-  @Column()
-  supervisor: string | null;
+  @Column({ type: 'float' })
+  baseSalary: number;
 
-  @Column()
-  isSupervisor: boolean;
+  @Column({ type: 'float' })
+  currentSalary: number;
 
-  @Column('text', { array: true })
-  subordinates: string[] | null;
+  @ManyToOne(() => CompanyEntity, (company) => company.staff)
+  company: CompanyEntity;
+
+  @ManyToOne(() => StaffEntity, (staff) => staff.subordinate)
+  supervisor: StaffEntity;
+
+  @OneToMany(() => SubordinateEntity, (staff) => staff.supervisor)
+  subordinate: SubordinateEntity[];
+
+  @ManyToOne(() => StaffMemberTypeEntity, (type) => type.staff)
+  type: StaffMemberTypeEntity;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updtedAt: Date;
+  updated_at: Date;
 }
