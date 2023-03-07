@@ -12,7 +12,7 @@ export const staffSalary = (
   staffType: string,
   basicSalary: number,
   subordinates: object[],
-) => {
+): number | string => {
   if (typeof dateHired !== 'string' || typeof dateNow !== 'string') {
     return 'Date error';
   }
@@ -23,11 +23,9 @@ export const staffSalary = (
   const dateNowConverted = Date.parse(dateNow);
 
   //Get how many years staff work.
-  //-1 because the first year doesn't count
-  const getYearsHiredCount =
-    Math.floor((dateNowConverted - dateHiredConverted) / 31536000000) - 1;
-
-  console.log('getYearsHiredCount', getYearsHiredCount);
+  const getYearsHiredCount = Math.floor(
+    (dateNowConverted - dateHiredConverted) / 31536000000,
+  );
 
   //If Employee
   if (staffType === 'Employee') {
@@ -94,42 +92,3 @@ export const staffSalary = (
     return 'Type error';
   }
 };
-
-// console.log(
-//   'Employee',
-//   staffSalary(
-//     '2013-03-04T09:28:24.000Z',
-//     '2023-04-04T09:46:49.000Z',
-//     'Employee',
-//     1000,
-//     [],
-//   ),
-// );
-
-// console.log(
-//   'Manager',
-//   staffSalary(
-//     '2018-03-04T09:28:24.000Z',
-//     '2023-04-04T09:46:49.000Z',
-//     'Manager',
-//     1000,
-//     [
-//       { id: '7', currentSalary: 1194 },
-//       { id: '8', currentSalary: 1000 },
-//     ],
-//   ),
-// );
-
-// console.log(
-//   'Sales',
-//   staffSalary(
-//     '2018-03-04T09:28:24.000Z',
-//     '2023-04-04T09:46:49.000Z',
-//     'Sales',
-//     1000,
-//     [
-//       { id: '7', currentSalary: 1194 },
-//       { id: '8', currentSalary: 1000 },
-//     ],
-//   ),
-// );

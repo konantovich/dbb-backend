@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   HttpException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -54,13 +55,10 @@ export class StaffService {
 
   //Create a new staff, and calc staff salary bonus by year hired.
   //if companyName == null or typeStaff == null - create new companyName or/and staffType
-  //Create supervisor(optional)
   async create(staffDto: CreateStaffDto): Promise<StaffEntity> {
-    console.log(staffDto);
     try {
       let company: CompanyEntity;
       let type: StaffMemberTypeEntity;
-      let supervisor: StaffEntity;
 
       //Find or create company
       if (staffDto.companyName) {
@@ -94,67 +92,6 @@ export class StaffService {
           await this.staffMemberTypeRepository.save(type);
         }
 
-        // const staff = this.staffRepository.create({
-        //   name: staffDto.name,
-        //   company: company,
-        //   joinDate: staffDto.joinDateHired.toString(),
-        //   baseSalary: staffDto.baseSalary,
-        //   currentSalary: staffDto.currentSalary,
-        // });
-
-        // await this.staffRepository.save(staff);
-
-        // return staff;
-
-        // staffSalary(
-        //   '2018-03-04T09:28:24.000Z',
-        //   '2023-04-04T09:46:49.000Z',
-        //   'Sales',
-        //   1000,
-        //   [
-        //     { id: '7', currentSalary: 1194 },
-        //     { id: '8', currentSalary: 1000 },
-        //   ],
-        // ),
-
-        const allSubordinates = this.staffRepository.find();
-
-        // allSubordinates.then((res) => {
-        //   console.log(res);
-        //   res
-        //     .filter((staff) => staff.supervisorName === staffDto.name)
-        //     .map((staff, index) => {
-        //       console.log(staff.id, +staffDto.subordinates[index]);
-        //       if (staff.id.toString() === staffDto.subordinates[index]) {
-        //         subordinatesSalary.push({
-        //           id: staff.id,
-        //           currentSalary: staff.currentSalary,
-        //         });
-        //       }
-        //     });
-
-        // //Create supervisor
-        // if (staffDto.supervisorName && staffDto.typeName !== 'Manager') {
-        //   supervisor = await this.staffRepository.findOneBy({
-        //     name: staffDto.supervisorName,
-        //   });
-        //   if (!supervisor) {
-        //     supervisor = null;
-        //   }
-        // } else {
-        //   supervisor = null;
-        // }
-
-        // if (!supervisor && staffDto.typeName !== 'Employee') {
-        //   supervisor = this.subordinateRepository.create({
-        //     supervisor: newStaffDto,
-        //   });
-        //   await this.subordinateRepository.save(supervisor);
-        // } else {
-        //   supervisor = null;
-        // }
-
-        console.log('subordinatesSalary', staffDto);
         let newStaffDto = {};
         const subordinatesSalary = [];
         //Calc bonus salary for years
@@ -172,59 +109,20 @@ export class StaffService {
           currentSalary: newStaffSalary,
           company: company,
           type: type,
-          // supervisor: null,
-          // supervisor: {
-          //   ...supervisor,
-          //   currentSalary: null,
-          //   baseSalary: null,
-          //   hiredDate: null,
-          // },
-          // subordinates: null,
         };
 
-        // //Create supervisor
-        // if (staffDto.supervisorName && staffDto.typeName !== 'Employee') {
-        //   supervisor = await this.subordinateRepository.findOneBy({
-        //     supervisor: newStaffDto,
-        //   });
-        // }
-
-        // if (!supervisor && staffDto.typeName !== 'Employee') {
-        //   supervisor = this.subordinateRepository.create({
-        //     supervisor: newStaffDto,
-        //   });
-        //   await this.subordinateRepository.save(supervisor);
-        // } else {
-        //   supervisor = null;
-        // }
-        console.log(supervisor);
-
-        console.log('newStaffDto', newStaffDto);
-        // });
         return this.staffRepository.save(newStaffDto);
       } else {
         throw new Error('Type name can only be Manager, Sales or Employee');
       }
     } catch (error) {
       //duplicate name
-      if (error.code === 'SQLITE_CONSTRAINT') {
-        throw new ConflictException('Name already exists');
-      } else {
-        throw new HttpException(
-          {
-            status: HttpStatus.FORBIDDEN,
-            error: error.message,
-          },
-          HttpStatus.FORBIDDEN,
-          {
-            cause: error,
-          },
-        );
-      }
+      console.log('Error:', error);
+      throw new InternalServerErrorException();
     }
   }
 
-  //Get on Staff information
+  //Get one Staff information
   async getOne(id: string): Promise<StaffEntity> {
     try {
       const optionsSubardinate: FindOneOptions<StaffEntity> = {
@@ -312,13 +210,7 @@ export class StaffService {
         relations: ['type'],
       };
       const supervisor = await this.staffRepository.findOne(optionsSupervisor);
-      // const supervisor = await this.staffRepository.findOne({
-      //   name: UpdateSubadinateteDto.supervisorName,
-      //   relations: ['type'],
-      // });
-      // const subordinate = await this.staffRepository.findOneBy({
-      //   name: UpdateSubadinateteDto.subordinateName,
-      // });
+
       const optionsSubardinate: FindOneOptions<StaffEntity> = {
         where: { name: UpdateSubadinateteDto.subordinateName },
         relations: ['type'],
@@ -366,10 +258,6 @@ export class StaffService {
           });
         });
 
-      // const updateSubordinate = new SubordinateEntity();
-      // updateSubordinate.supervisor = supervisor;
-      // await this.subordinateRepository.save(updateSubordinate);
-
       subordinate.supervisor = {
         ...supervisor,
         baseSalary: null,
@@ -381,8 +269,6 @@ export class StaffService {
         supervisor,
         subordinate,
       });
-
-      console.log(newSubordinate);
 
       return this.subordinateRepository.save(newSubordinate);
     } catch (error) {

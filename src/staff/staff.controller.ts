@@ -42,9 +42,7 @@ export class StaffController {
     return this.staffService.getOne(id);
   }
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'none')
-  @UsePipes(ValidationPipe)
   async create(@Body() CreateStaffDto: CreateStaffDto): Promise<StaffEntity> {
     return await this.staffService.create(CreateStaffDto);
   }
